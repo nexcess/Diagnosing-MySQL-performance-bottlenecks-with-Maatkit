@@ -1,0 +1,39 @@
+DATE: 3-5-2011
+AUTHOR: spetrow <support@nexcess.net>
+
+DESCRIPTION: Files that correlate with the blog.nexcess.net post from 3-5-2011 "Diagnosing MySQL performance bottlenecks with Maatkit"
+
+INSTRUCTIONS: 
+WATCH BACKTICKS [`] VS. SINGLE QUOTES ['].  Backticks enclose SQL objects like table and column names; single quotes enclose strings.
+
+1.) You will need to edit index.php and change the following section to match the configuration of your system:
+// DB CONNECTION
+$dbhost = 'localhost';
+$dbuser = 'some_dbuser';
+$dbpass = 'some_dbpass';
+$dbname = 'some_database';
+
+
+2a.) You can either 'gunzip' the file 'sample-db-100K-records.sql.gz' and import it into your database:
+mysql -u some_dbuser -psome_dbpass some_database < sample-db-100K-records.sql
+
+2b.) or set up your database manually:
+
+CREATE DATABASE IF NOT EXISTS some_database;
+CREATE TABLE `some_databaseName`.`some_table` (
+`id` INT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY ,
+`number` INT UNSIGNED NOT NULL
+) ENGINE = MYISAM;
+GRANT ALL ON some_database.* TO 'some_dbuser'@'localhost' IDENTIFIED BY 'some_dbpass';
+FLUSH PRIVILEGES;
+
+
+3.) Here are copy'n'paste lines for mk-query-profiler:
+
+echo "SELECT * FROM some_table WHERE number IN (1,2,3,4,5);" \
+| ./mk-query-profiler --host=0 --user=some_dbuser --pass=some_dbpass --database=some_database
+
+4.) Here is the SQL to add the index to the `number` column
+ALTER TABLE `some_table` ADD INDEX ( `number` );
+
+Have fun!
